@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5e57">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="蘇杭行程">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>上蘇杭之旅</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ec; --paper:#fffdf9; --ink:#1d2731; --ink2:#4b5560; --muted:#7a828a;
+  --jade:#0f5e57; --jade2:#e3efec; --vermil:#b4442c; --vermil2:#f8e6e0; --gold:#b98a2e;
+  --line:#e6dfd3; --shadow:0 1px 2px rgba(29,39,49,.06),0 4px 14px rgba(29,39,49,.06);
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:19px;line-height:1.55}
+body{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+
+/* header */
+header.top{background:var(--jade);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 0 22px;position:relative;overflow:hidden}
+header.top::after{content:"";position:absolute;right:-40px;bottom:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,.12);box-shadow:0 0 0 22px rgba(255,255,255,.05),0 0 0 48px rgba(255,255,255,.04)}
+.top .eyebrow{font-size:14px;letter-spacing:.12em;opacity:.8}
+.top h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:30px;margin:2px 0 6px;letter-spacing:.04em}
+.top .status{display:inline-block;background:rgba(255,255,255,.16);border-radius:999px;padding:4px 14px;font-size:16px;font-weight:500}
+
+/* sections */
+main{padding-top:14px}
+.view{display:none}
+.view.on{display:block}
+h2.sec{font-size:17px;color:var(--ink2);font-weight:700;margin:22px 4px 10px;letter-spacing:.06em}
+.card{background:var(--paper);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:12px;border:1px solid var(--line)}
+
+/* weather */
+.wx-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.wx{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow)}
+.wx .city{font-weight:700;font-size:17px}
+.wx .big{font-size:34px;font-weight:900;line-height:1.1;margin:4px 0}
+.wx .big small{font-size:16px;font-weight:500;color:var(--ink2)}
+.wx .sub{font-size:15px;color:var(--ink2)}
+.wx.plan .big{font-size:20px}
+.note{font-size:14px;color:var(--muted);margin:6px 4px 0}
+
+/* hotel */
+.hotel{display:flex;gap:14px;align-items:center}
+.hotel .ic{width:52px;height:52px;border-radius:14px;background:var(--vermil2);display:grid;place-items:center;font-size:28px;flex:none}
+.hotel .lbl{font-size:14px;color:var(--muted)}
+.hotel .nm{font-size:20px;font-weight:700;line-height:1.3}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:none;border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;background:var(--jade2);color:var(--jade);text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:46px}
+.btn.solid{background:var(--jade);color:#fff}
+.btn.warm{background:var(--vermil2);color:var(--vermil)}
+
+/* day chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--paper);border-radius:14px;padding:8px 12px;text-align:center;min-width:76px;scroll-snap-align:start}
+.chip b{display:block;font-size:17px}
+.chip span{font-size:13px;color:var(--muted)}
+.chip.on{background:var(--jade);border-color:var(--jade);color:#fff}
+.chip.on span{color:rgba(255,255,255,.8)}
+.chip.today{border-color:var(--vermil)}
+
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;margin:6px 4px 10px}
+.dayhead .t{font-family:"Noto Serif TC",serif;font-size:24px;font-weight:900}
+.dayhead .w{font-size:15px;color:var(--ink2)}
+
+/* timeline */
+.tl{position:relative;margin-left:6px}
+.tl::before{content:"";position:absolute;left:62px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.it{display:grid;grid-template-columns:50px 1fr;gap:24px;position:relative;margin-bottom:12px}
+.it .tm{text-align:right;font-weight:700;font-size:17px;padding-top:15px;line-height:1.15}
+.it .tm small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.it .dot{position:absolute;left:57px;top:20px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--jade)}
+.it .body{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow)}
+.it .ttl{font-size:19px;font-weight:700;line-height:1.4}
+.it .tag{display:inline-block;font-size:13px;font-weight:700;padding:1px 8px;border-radius:6px;margin-right:6px;vertical-align:2px}
+.tag.food{background:#fbefd9;color:#8a5a00}.tag.move{background:#e4ecf7;color:#2b5797}.tag.hotel{background:var(--vermil2);color:var(--vermil)}
+.tag.show{background:#efe5f6;color:#6b3d8c}.tag.sight{background:var(--jade2);color:var(--jade)}.tag.biz{background:#eceff1;color:#455a64}
+.it .desc{font-size:15px;color:var(--ink2);white-space:pre-line;margin-top:6px}
+.it .btns{margin-top:10px}
+.it .btn{min-height:40px;padding:7px 12px;font-size:15px}
+.it.now .body{border:2px solid var(--vermil);box-shadow:0 0 0 4px var(--vermil2)}
+.it.now .dot{border-color:var(--vermil);background:var(--vermil)}
+.it.next .dot{border-color:var(--gold)}
+.it.done{opacity:.55}
+.badge{display:inline-block;font-size:13px;font-weight:900;color:#fff;background:var(--vermil);border-radius:6px;padding:1px 8px;margin-bottom:4px}
+.badge.next{background:var(--gold)}
+.divider{text-align:center;font-size:15px;color:var(--muted);margin:16px 0 14px 74px;position:relative}
+.divider span{background:var(--bg);padding:0 10px;position:relative}
+.divider::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.5px dashed var(--line)}
+
+/* info */
+.fx{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.fx label{font-size:14px;color:var(--muted);display:block;margin-bottom:4px}
+.fx input{width:100%;font:inherit;font-size:26px;font-weight:700;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;color:var(--ink)}
+.fx .eq{font-size:24px;color:var(--muted);padding-top:20px}
+.rate{font-size:15px;color:var(--ink2);margin-top:10px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.quick button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-size:15px}
+.tel{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);gap:10px}
+.tel:last-child{border-bottom:none}
+.tel .n{font-weight:700}
+.tel .d{font-size:14px;color:var(--muted)}
+.tel .num{font-size:20px;font-weight:900;color:var(--vermil);text-decoration:none;white-space:nowrap}
+.tips p{margin:0 0 10px}
+.tips b{color:var(--jade)}
+table.sort{width:100%;border-collapse:collapse;font-size:16px}
+table.sort th{text-align:left;font-size:14px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:2px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+table.sort th::after{content:" ↕";opacity:.35}
+table.sort th.asc::after{content:" ▲";opacity:.9}
+table.sort th.desc::after{content:" ▼";opacity:.9}
+table.sort td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+
+/* food */
+.food{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.food:last-child{border-bottom:none}
+.food .e{font-size:26px;flex:none;width:36px;text-align:center}
+.food .n{font-weight:700}
+.food .d{font-size:15px;color:var(--ink2);white-space:pre-line}
+
+/* bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,249,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabs button{border:none;background:none;border-radius:12px;padding:6px 0;font-size:15px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px}
+nav.tabs button .i{font-size:24px;line-height:1}
+nav.tabs button.on{color:var(--jade);background:var(--jade2)}
+
+/* driver modal */
+.modal{position:fixed;inset:0;background:#fff;z-index:50;display:none;flex-direction:column;padding:calc(20px + env(safe-area-inset-top)) 22px calc(20px + env(safe-area-inset-bottom))}
+.modal.on{display:flex}
+.modal .say{font-size:24px;color:var(--ink2)}
+.modal .dest{font-family:"Noto Serif TC",serif;font-size:clamp(40px,11vw,64px);font-weight:900;line-height:1.25;margin:16px 0;word-break:break-all}
+.modal .city{font-size:24px;color:var(--ink2)}
+.modal .foot{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+.modal .foot .btn{flex:1;justify-content:center;font-size:18px;min-height:56px}
+.sync{font-size:13px;color:var(--muted);text-align:center;margin:24px 0 8px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow" id="hdrEyebrow">TRIP · 2026</div>
+    <h1 id="hdrTitle">上蘇杭之旅</h1>
+    <div class="status" id="hdrStatus">載入中…</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 今日 -->
+  <section class="view on" id="v-today"></section>
+  <!-- 行程 -->
+  <section class="view" id="v-plan">
+    <div class="chips" id="chips"></div>
+    <div id="planDay"></div>
+  </section>
+  <!-- 資訊 -->
+  <section class="view" id="v-info"></section>
+  <!-- 美食 -->
+  <section class="view" id="v-food"></section>
+  <div class="sync" id="syncNote"></div>
+</main>
+
+<nav class="tabs"><div class="in">
+  <button data-v="today" class="on"><span class="i">☀️</span>今天</button>
+  <button data-v="plan"><span class="i">🗓️</span>全部行程</button>
+  <button data-v="info"><span class="i">🧭</span>實用資訊</button>
+  <button data-v="food"><span class="i">🥟</span>美食</button>
+</div></nav>
+
+<div class="modal" id="driver">
+  <div class="say">師傅您好，請帶我們到：<br><span style="font-size:18px">师傅您好，请带我们去：</span></div>
+  <div class="dest" id="drvDest"></div>
+  <div class="city" id="drvCity"></div>
+  <div class="foot">
+    <a class="btn solid" id="drvAmap" target="_blank" rel="noopener">高德地圖</a>
+    <a class="btn" id="drvGoogle" target="_blank" rel="noopener">Google 地圖</a>
+    <button class="btn warm" id="drvClose">關閉</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   設定區：出發前改這裡就好
+   ============================================================ */
+const CONFIG = {
+  // 領隊 / 家人聯絡電話（請改成真的號碼，含國碼）
+  contacts: [
+    { name: "Alex（領隊）", desc: "有事先打給我", phone: "" },
+  ],
+  // 酒店手動補充（Trello 卡片沒寫店名時用）。key = 日期 MM/DD
+  hotelOverrides: {
+    // "04/02": "上海 xxx 酒店",
+  },
+  // 匯率備用值（抓不到即時匯率時使用，取自 Trello「攜帶物品」卡）
+  fallbackRate: 4.45,
+};
+
+/* Trello 快照：由 Claude 從 Trello board 同步產生 */
+const SNAPSHOT = {"board": "20260403 上蘇杭9天", "syncedAt": "2026-11-13 15:04", "lists": [{"name": "行前準備", "cards": [{"name": "攜帶物品", "desc": "- **電壓**：上海採用 **220伏特** 的交流電，頻率為 **50赫茲**。插頭形式通常為兩腳扁型或三腳扁型，台灣電器若不支援國際電壓，需使用變壓器。\n- **時差**：與台灣 **無時差**（GMT+8）。\n- **天氣**：上海屬副熱帶季風氣候，四季分明。4月平均氣溫約 **15°C - 20°C**，氣候涼爽但早晚溫差大，偶有春雨。\n- **簽證**：需持有效 **台胞證**（卡式台胞證）。若無證件可於抵達上海後辦理一次性台胞證（落地簽，需備妥照片與身分證）。\n- **貨幣**：**1.000 (人民幣 CNY)** ≈ **4.45 (新台幣 TWD)** _(2026/04/02 參考匯率)_。當地支付高度依賴支付寶 (Alipay) 或微信支付 (WeChat Pay)。"}, {"name": "記帳", "desc": ""}, {"name": "上海介紹", "desc": ""}, {"name": "杭州特色美食", "desc": "蔥包檜：餅皮焦脆金黃，油條蔥香交融，甜醬提味\n片兒川：雪菜筍片鮮嫩，麵條筋道爽滑，湯頭濃郁醇厚\n吳山酥油餅：層層起酥掉渣，色澤金黃誘人，微甜不膩可口\n定勝糕：軟糯香甜細膩，桂花香氣淡雅，寓意金榜題名\n貓耳朵：形似貓耳小巧，雞湯燉煮鮮美，配料豐富彈韌\n知味觀小籠：皮薄如紙透亮，肉餡緊實多汁，鮮鹹恰到好處\n乾炸響鈴：外皮酥脆蓬鬆，內餡鮮嫩多汁，蘸醋解膩提香\n杭州醬鴨：色澤紅亮油潤，肉質緊實不柴，醬香鹹甜平衡\n西湖蓴菜羹：蓴菜滑嫩無渣，湯色清澈透亮，清香淡雅爽口\n東坡肉：色澤紅亮誘人，肉質酥爛脫骨，肥而不膩香甜\n"}]}, {"name": "上海 Day1 四 04/02 陰", "cards": [{"name": "14:55 - 16:30 松山T1 -> 虹橋T1", "desc": ""}, {"name": "18:00 抵達酒店", "desc": ""}, {"name": "18:00 - 20:00 田子坊", "desc": ""}, {"name": "上海新天地", "desc": ""}, {"name": "20:30 - 22:00 人和馆·上海菜(徐汇店) 已預約", "desc": ""}]}, {"name": "西塘 Day2 五 04/03 陰 14-15c", "cards": [{"name": "08:00上海 -> 09:30西塘 Taxi 1.5hr", "desc": ""}, {"name": "10:00 西塘滿覺瓏精品飯店 check-in", "desc": ""}, {"name": "10:00 - 11:00 煙雨長廊", "desc": ""}, {"name": "11:30 - 13:00 錢雨曼 景觀餐廳 (要排隊)", "desc": ""}, {"name": "14：00-16：00 漢服體驗", "desc": ""}, {"name": "西塘花巷→送子來鳳橋→煙雨長廊→永寧橋→", "desc": ""}, {"name": "臥龍橋→安境橋→西街→西園→環秀橋→醉園→護國隨糧王廟→五姑娘主題公園 石皮弄", "desc": ""}]}, {"name": "西湖 Day3 六 04/04 陰", "cards": [{"name": "09:00 - 10:30 【交通】西塘搭車出發 ➡️ 抵達友好飯店", "desc": ""}, {"name": "10:30 - 11:00 【入住】辦理 Check-in (寄放行李)", "desc": ""}, {"name": "11:00 - 13:30 【午餐】河坊街 (老頭兒油爆蝦）", "desc": ""}, {"name": "13:30 - 15:30 【景點】胡雪巖故居 (江南第一豪宅，看芝園水榭)", "desc": ""}, {"name": "15:30 - 17:00 【古風】南宋御街 ➡️ 胡慶餘堂 (中藥文化與老街建築)", "desc": ""}, {"name": "17:00 - 18:00 【騎行】柳浪聞鶯 (西湖十景，感受湖邊柳色)", "desc": ""}, {"name": "18:00 - 19:30 【晚餐】湖濱 in77 購物中心 (本日唯一逛街)", "desc": ""}, {"name": "19:30 - 20:00 【演出】西湖音樂噴泉 (飯店對面)", "desc": ""}]}, {"name": "西湖 Day4 日 04/05 陰 13-25c", "cards": [{"name": "09:00 - 10:30 【跟團】蘇東坡紀念館集合 (聽蘇堤/斷橋/雙峰典故)", "desc": ""}, {"name": "10:30 - 12:30 【導覽】三潭印月登島 (打卡一元人民幣背景)", "desc": ""}, {"name": "12:30 - 14:00 【午餐】樸墅 (北山路店，近曲院風荷)", "desc": ""}, {"name": "14:00 - 15:30 【十景】花港觀魚 (補完紅魚與牡丹園)", "desc": ""}, {"name": "14:00 - 15:00 【體驗】楊公堤單車騎行 (六橋起伏，直通烏龜潭)", "desc": ""}, {"name": "13:00 - 14:00 【歷史】岳王廟參觀 ➡️ 曲院風荷 (達成十景)", "desc": ""}, {"name": "15:30 - 17:00 【十景】南屏晚鐘：淨慈寺 (聽鐘聲，拍雷峰塔全景)", "desc": ""}, {"name": "17:00 - 18:30 【十景】雷峰夕照：雷峰塔 (18:15 日落)", "desc": ""}, {"name": "18:30 - 20:00 【晚餐】西子賓館牡丹亭", "desc": ""}, {"name": "20:00 - 21:30 【放鬆】高品質中醫推拿 (緩解連日腳力)", "desc": ""}]}, {"name": "西湖 Day5 一 04/06 13-24c", "cards": [{"name": "10:30 - 11:30 【十景】斷橋殘雪 ➡️ 白堤 ➡️ 平湖秋月 (晨間漫步)", "desc": ""}, {"name": "11:30 - 12:30 【人文】西泠印社 (刻印文化)", "desc": ""}, {"name": "15:00 - 16:30 【船】搖櫓船：烏龜潭秘境 (指定烏龜潭路線，西湖最幽靜處)", "desc": ""}, {"name": "16:30 - 18:00 【拍照】西子賓館 (汪莊) 園林漫步 (看雷峰夕照對景)", "desc": ""}, {"name": "18:00 - 20:00 【晚宴】西子賓館．牡丹廳 (西湖國宴級體驗)", "desc": ""}, {"name": "20:00 - 21:00 【演出】印象西湖：最憶是杭州 (水上大秀)", "desc": ""}, {"name": "11:30 - 13:00 【午餐】樓外樓 (孤山總店，品嚐經典杭幫菜)", "desc": ""}]}, {"name": "西湖/宜興 Day6 二 04/07 11-20c", "cards": [{"name": "08:30 - 10:30【飛來峰造像】➡️【靈隱寺】：清晨參拜，避開遊客潮。", "desc": ""}, {"name": "10:30 - 12:00【龍井問茶】", "desc": ""}, {"name": "12:00 - 14:00【午餐：西湖國賓館．牡丹廳】", "desc": ""}, {"name": "回酒店取行再到杭州車站", "desc": ""}, {"name": "胡雪巖故居", "desc": ""}, {"name": "15:00西湖 -> 17:00宜興 2hr", "desc": ""}, {"name": "宜興人民中路希爾頓歡朋酒店 check-in", "desc": ""}, {"name": "Alex : 雲創商務晚餐", "desc": ""}, {"name": "裕蓮茶樓（八佰伴）", "desc": ""}]}, {"name": "宜興/蘇州 Day7 三 04/08 陰 12-18c", "cards": [{"name": "10：00 樹夏", "desc": ""}, {"name": "Alex : 上午訪廠+商務中餐", "desc": ""}, {"name": "14:00宜興 -> 16:00蘇州 Taxi 2hr", "desc": ""}, {"name": "蘇州吳宮泛太平洋飯店 check-in", "desc": ""}, {"name": "16:00 - 17:00 漢服體驗", "desc": ""}, {"name": "盤門景點 (optional)", "desc": ""}, {"name": "晚餐:同德興麵館", "desc": ""}, {"name": "平江路 蘇州評彈:琵琶語評彈館  時段→18:30/20:00/21:30", "desc": ""}]}, {"name": "蘇州 Day8 四 04/09 陰 15-20c", "cards": [{"name": "07:10 - 07:40 蘇州車站 (寄存行李) + 北廣場集合", "desc": ""}, {"name": "==以下是跟團行程==", "desc": ""}, {"name": "08:00蘇州站 -> 拙政園", "desc": ""}, {"name": "蘇州博物館", "desc": ""}, {"name": "寒山寺", "desc": ""}, {"name": "虎丘", "desc": ""}, {"name": "16:45 山塘街 解散", "desc": ""}, {"name": "==以下是離開跟團==", "desc": ""}, {"name": "晚餐 松鶴樓", "desc": ""}, {"name": "榮陽樓:油汆團子", "desc": ""}, {"name": "夜遊蘇州古運河", "desc": ""}, {"name": "通貴橋拍下最經典的夜景", "desc": ""}, {"name": "山塘街 尋夢山塘（沉浸式昆曲表演）  時段→19:00/20:00/21:00", "desc": ""}, {"name": "蘇州車站 -> 上海", "desc": ""}]}, {"name": "上海 Day9 五 04/10 陰 12-19c", "cards": [{"name": "09:00 - 10:30 旗袍體驗：妝造", "desc": ""}, {"name": "10:30 - 13:30 豫園+城煌廟", "desc": ""}, {"name": "南翔小籠包", "desc": ""}, {"name": "13:30 - 15:00 思南公館拍照", "desc": ""}, {"name": "15:30 - 16:30 武康路拍照", "desc": ""}, {"name": "17:00 - 20:00 南京東路步行街", "desc": ""}, {"name": "下午茶：和平飯店                                    (維客多咖啡廳)", "desc": ""}, {"name": "外灘", "desc": ""}, {"name": "晚餐", "desc": ""}, {"name": "20:00 - 21:00 外灘酒吧看夜景", "desc": ""}, {"name": "21:30 - 23:00 中醫推拿經絡調理按摩", "desc": ""}]}, {"name": "上海 Day10 六 04/11 雨", "cards": [{"name": "10:15 - 11:00 四行倉庫", "desc": ""}, {"name": "蘇州河+咖啡館", "desc": ""}, {"name": "13:15 - 13:30 坐渡輪去陸家嘴", "desc": ""}, {"name": "13:30 - 14:00 迪士尼旗鑑店", "desc": ""}, {"name": "14:15 - 17:00 朵雲書院+購物中心", "desc": ""}, {"name": "朵雲書院 -> 酒店拿行李 -> 地鐵", "desc": ""}, {"name": "17:00 -> 17:40 到虹橋機場", "desc": ""}, {"name": "19:40 - 21:45 虹橋T1 -> 松山T1", "desc": ""}, {"name": "中餐：佳家湯包", "desc": ""}, {"name": "豫園晚餐：上海老弄堂麵館", "desc": ""}, {"name": "洗頭", "desc": ""}, {"name": "09:30 - 10:15 靜安寺", "desc": ""}]}, {"name": "吃喝清單", "cards": [{"name": "菜菜小籠", "desc": ""}, {"name": "小楊生煎", "desc": ""}, {"name": "HOMES", "desc": ""}, {"name": "人和館", "desc": "米其林餐廳\n蟹黃飯\n手撕豆腐煲"}, {"name": "東泰祥", "desc": ""}, {"name": "三又二分之一咖啡館", "desc": ""}, {"name": "Apoli麵包店", "desc": ""}, {"name": "pollet眼鏡店", "desc": ""}, {"name": "Pudding Papa", "desc": ""}, {"name": "Butterful & Creamorous", "desc": "必吃人氣品項：\n爆漿開心果牛角包： 香濃的奶油內餡令人印象深刻。\n威靈頓牛排牛角包： 將法式料理融入烘焙，酥脆且份量十足。\n巨無霸綜合莓果拿破崙： 酥脆千層派皮搭配新鮮水果與奶油。\n草莓卡士達奶油捲/泡芙： 鬆軟蛋糕與豐富卡士達的經典組合。\n法式樹莓奶油牛角酥： 酸甜風味與酥脆口感。"}, {"name": "飲料-茉酸奶", "desc": "3.茉酸奶(我的第一名真的超好喝, 原創牛油果酸奶奶昔¥23\n無糖正常冰"}, {"name": "飲料-茉莉奶白", "desc": "2.茉莉奶白\n抹茶茉莉鹹酪乳¥18\n無糖少冰"}, {"name": "飲料-阿嬤手作", "desc": "1.阿嬤手作\n斯里蘭卡奶茶+灼燒黑糖芝士+芋泥麻薯¥35 少少少糖少冰(冰塊偏多,可以試看看去冰)"}, {"name": "上海觀汾酒館", "desc": "靜安區華山路390號"}]}]};
+
+/* ============================================================ */
+const CITY_GEO = {
+  "上海": [31.2304,121.4737], "西塘": [30.9440,120.8900], "杭州": [30.2590,120.1500],
+  "宜興": [31.3600,119.8230], "蘇州": [31.2990,120.6200]
+};
+const CITY_ALIAS = { "西湖":"杭州", "杭州":"杭州", "上海":"上海", "西塘":"西塘", "宜興":"宜興", "蘇州":"蘇州", "陸家嘴":"上海", "虹橋":"上海" };
+const AMAP_CITY = { "上海":"上海", "西塘":"嘉興", "杭州":"杭州", "宜興":"無錫", "蘇州":"蘇州" };
+const WEEK = ["日","一","二","三","四","五","六"];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+/* ---------- 解析 Trello ---------- */
+function yearOf(board){ const m = /(20\d\d)/.exec(board||""); return m ? +m[1] : new Date().getFullYear(); }
+function findCity(text){
+  for (const k of Object.keys(CITY_ALIAS)) if (text.includes(k)) return CITY_ALIAS[k];
+  return null;
+}
+function parseTime(name){
+  const n = name.replace(/：/g, ":");
+  const m = /^\s*(\d{1,2}):(\d{2})\s*(?:->|-|–|~)?\s*(?:(\d{1,2}):(\d{2}))?/.exec(n);
+  if (!m) return null;
+  return { start: m[1].padStart(2,"0")+":"+m[2], end: m[3] ? m[3].padStart(2,"0")+":"+m[4] : null, rest: n.slice(m[0].length) };
+}
+// 【】裡是分類標籤就移除，是地名就保留
+const TAGS = /【(交通|入住|午餐|晚餐|晚宴|景點|古風|騎行|演出|跟團|導覽|十景|體驗|歷史|船|拍照|人文|放鬆)】/g;
+function catOf(t){
+  if (/^Alex\s*[:：]/i.test(t)) return ["biz","個人"];
+  if (/check-?in|入住|抵達酒店/i.test(t)) return ["hotel","住宿"];
+  if (/【(午餐|晚餐|晚宴)】/.test(t)) return ["food","餐飲"];
+  if (/【演出】/.test(t)) return ["show","表演"];
+  if (/->|【交通】|Taxi|搭車|渡輪|車站|機場|T1|取行/i.test(t)) return ["move","交通"];
+  if (/午餐|晚餐|中餐|晚宴|早餐|下午茶|小籠|麵館|湯包|團子|茶樓|餐廳|生煎|酒館|菜/.test(t)) return ["food","餐飲"];
+  if (/演出|評彈|昆曲|噴泉|大秀|表演/.test(t)) return ["show","表演"];
+  return ["sight","景點"];
+}
+function cleanPlace(t, cat){
+  let s = t.replace(/^\s*Alex\s*[:：]\s*/i,"").replace(TAGS," ").replace(/[【】]/g," ");
+  if (cat === "move") {
+    const parts = s.split(/->|➡️/);
+    s = parts[parts.length-1];
+    s = s.replace(/\d{1,2}[:：]\d{2}/g,"").replace(/Taxi|[\d.]+\s*hr/ig,"").replace(/^\s*(抵達|到)/,"");
+  }
+  s = s.replace(/[（(][^）)]*[）)]?/g," ")
+       .replace(/已預約|要排隊|check-?in|optional/ig,"")
+       .replace(/^\s*(午餐|晚餐|中餐|下午茶|晚宴|豫園晚餐)\s*[:：\s]/,"")
+       .replace(/時段.*$/,"");
+  s = s.split(/➡️|→|\+/)[0];
+  // 「名稱：說明」→ 餐廳取前半；景點取後半（例：雷峰夕照：雷峰塔）
+  const c = s.split(/[：:]/).map(x => x.trim()).filter(Boolean);
+  if (c.length > 1) s = (cat === "food" || c[1].length <= 2 || c[1].length > 10) ? c[0] : c[1];
+  s = s.replace(/\s+/g," ").trim();
+  if (/^(晚餐|午餐|中餐|洗頭|地鐵|辦理|抵達酒店)$/.test(s)) s = "";
+  return s;
+}
+function parseTrip(snap){
+  const year = yearOf(snap.board);
+  const days = [], extra = {};
+  let curCity = null, hotel = null;
+  for (const l of snap.lists) {
+    const m = /^(.+?)\s*Day\s*(\d+)\s*([一二三四五六日])?\s*(\d{1,2})\/(\d{1,2})\s*(.*)$/i.exec(l.name.trim());
+    if (!m) { extra[l.name] = l.cards; continue; }
+    const cities = m[1].split("/").map(c => CITY_ALIAS[c.trim()] || c.trim());
+    const date = new Date(year, +m[4]-1, +m[5]);
+    const mmdd = m[4].padStart(2,"0")+"/"+m[5].padStart(2,"0");
+    curCity = cities[0];
+    // 先排序：沒有時間的卡片沿用前一張的時間，維持 Trello 原順序
+    let lastT = "00:00";
+    const raw = l.cards.map((c,i) => {
+      const t = parseTime(c.name);
+      if (t) lastT = t.start;
+      return { c, t, key: (t ? t.start : lastT), i };
+    }).sort((a,b) => a.key === b.key ? a.i - b.i : a.key.localeCompare(b.key));
+    const items = [];
+    for (const { c, t } of raw) {
+      const name = c.name.trim();
+      if (/^=+.*=+$/.test(name)) { items.push({ divider: name.replace(/=/g,"").trim() }); continue; }
+      const title = (t ? t.rest : name).trim();
+      const [cat, catLabel] = catOf(name);
+      const place = cleanPlace(title, cat);
+      if (cat === "move") {
+        const dc = findCity(title.split(/->|➡️/).pop() || ""); if (dc) curCity = dc;
+        if (/(飯店|酒店)$/.test(place)) hotel = { name: place, city: curCity };
+      }
+      if (cat === "hotel" && /(飯店|酒店)$/.test(place) && !/^抵達/.test(place)) hotel = { name: place, city: curCity };
+      const navPlace = cat === "hotel" ? (hotel && hotel.city === curCity ? hotel.name : "") : place;
+      items.push({ show: title.replace(TAGS,"").replace(/[【】]/g," ").replace(/\s+/g," ").trim(), start: t?.start || null, end: t?.end || null, title, cat, catLabel, place: navPlace, city: curCity, desc: c.desc || "" });
+    }
+    const endCity = curCity;
+    let tonight = CONFIG.hotelOverrides[mmdd] ? { name: CONFIG.hotelOverrides[mmdd], city: endCity } : (hotel && hotel.city === endCity ? hotel : null);
+    days.push({ n: +m[2], date, mmdd, week: WEEK[date.getDay()], cities: [...new Set([...cities, endCity])], note: m[6].trim().replace(/(\d)c\b/g,"$1°C"), items, hotel: tonight, endCity });
+  }
+  days.sort((a,b) => a.date - b.date);
+  if (days.length) { const L = days[days.length-1]; if (!L.hotel && !CONFIG.hotelOverrides[L.mmdd]) L.hotel = { name: "當晚搭機返台", city: L.endCity, home: true }; }
+  return { title: snap.board.replace(/^\d{8}\s*/,""), board: snap.board, days, extra, syncedAt: snap.syncedAt };
+}
+
+/* ---------- 連結 ---------- */
+const amap = (q, city) => `https://uri.amap.com/search?keyword=${encodeURIComponent(q)}&city=${encodeURIComponent(AMAP_CITY[city]||city||"")}&callnative=1`;
+const gmap = (q, city) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q+" "+(city||""))}`;
+function navBtns(place, city){
+  if (!place) return "";
+  return `<div class="btns">
+    <a class="btn" href="${amap(place,city)}" target="_blank" rel="noopener">📍 導航</a>
+    <button class="btn warm" data-drv="${esc(place)}" data-city="${esc(city||"")}">🚕 給司機看</button>
+  </div>`;
+}
+
+/* ---------- 時間狀態 ---------- */
+const QS = new URLSearchParams(location.search);
+function now(){
+  const o = QS.get("now"); // 測試用：?now=2026-04-05T15:10
+  return o ? new Date(o) : new Date();
+}
+const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const hm = d => String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+
+/* ---------- 畫面 ---------- */
+let TRIP, selDay = 0, RATE = null, RATE_SRC = "";
+
+function renderTimeline(day, live){
+  const t = hm(now());
+  let nowIdx = -1, nextIdx = -1;
+  if (live) {
+    // 最後一個已開始的項目 = 進行中（若已過結束時間則無）
+    day.items.forEach((it,i) => { if (it.start && it.start <= t) nowIdx = i; });
+    if (nowIdx >= 0 && day.items[nowIdx].end && t >= day.items[nowIdx].end) nowIdx = -1;
+    nextIdx = day.items.findIndex(it => it.start && it.start > t);
+  }
+  let h = `<div class="tl">`;
+  day.items.forEach((it,i) => {
+    if (it.divider) { h += `<div class="divider"><span>${esc(it.divider)}</span></div>`; return; }
+    let cls = "";
+    if (live) {
+      if (i === nowIdx) cls = "now";
+      else if (i === nextIdx) cls = "next";
+      else if (it.start && it.start <= t && (nowIdx === -1 || i < nowIdx)) cls = "done";
+    }
+    h += `<div class="it ${cls}">
+      <div class="tm">${it.start ? esc(it.start) : "—"}${it.end ? `<small>${esc(it.end)}</small>` : ""}</div>
+      <div class="dot"></div>
+      <div class="body">
+        ${cls === "now" ? `<div class="badge">進行中</div>` : cls === "next" ? `<div class="badge next">下一站</div>` : ""}
+        <div class="ttl"><span class="tag ${it.cat}">${it.catLabel}</span>${esc(it.show)}</div>
+        ${it.desc ? `<div class="desc">${esc(it.desc)}</div>` : ""}
+        ${it.cat !== "biz" ? navBtns(it.place, it.city) : ""}
+      </div></div>`;
+  });
+  return h + `</div>`;
+}
+
+function hotelCard(day){
+  const h = day.hotel;
+  return `<div class="card"><div class="hotel">
+    <div class="ic">🏨</div>
+    <div><div class="lbl">${day.mmdd} 今晚住宿 · ${esc(day.endCity)}</div>
+    <div class="nm">${h ? esc(h.name) : "（Trello 尚未填入酒店名稱）"}</div></div></div>
+    ${h && !h.home ? navBtns(h.name, h.city) : ""}</div>`;
+}
+
+function tripState(){
+  const d = now(), days = TRIP.days;
+  const idx = days.findIndex(x => sameDay(x.date, d));
+  if (idx >= 0) return { mode:"live", idx };
+  const first = days[0].date, last = days[days.length-1].date;
+  const t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  if (t0 < first) return { mode:"before", idx:0, n: Math.round((first - t0)/864e5) };
+  return { mode:"after", idx:0 };
+}
+
+function renderToday(){
+  const st = tripState();
+  const day = TRIP.days[st.idx];
+  const status = st.mode === "live" ? `今天是第 ${day.n} 天 · ${day.mmdd}（${day.week}）`
+               : st.mode === "before" ? `距離出發還有 ${st.n} 天`
+               : `旅程已結束 · 以下為第 1 天行程回顧`;
+  $("#hdrStatus").textContent = status;
+  let h = "";
+  if (st.mode !== "live") h += `<div class="card" style="background:var(--jade2);border-color:transparent">
+      ${st.mode === "before" ? "旅程還沒開始，先看看第一天的安排。出發當天，這一頁會自動變成「當天行程」，並標出<b>進行中</b>和<b>下一站</b>。" : "這趟旅程已經結束了。出發當天這一頁會自動切成「當天行程」。"}
+    </div>`;
+  h += `<h2 class="sec">今日天氣</h2><div class="wx-row" id="wxToday">${day.cities.map(c => wxCardPlan(c, day)).join("")}</div>`;
+  h += `<h2 class="sec">今晚住宿</h2>${hotelCard(day)}`;
+  h += `<div class="dayhead"><div class="t">Day ${day.n} · ${esc(day.cities.join(" → "))}</div><div class="w">${day.mmdd}（${day.week}）</div></div>`;
+  h += renderTimeline(day, st.mode === "live");
+  $("#v-today").innerHTML = h;
+  loadWeather(day, "#wxToday");
+}
+
+function renderChips(){
+  const st = tripState();
+  $("#chips").innerHTML = TRIP.days.map((d,i) =>
+    `<button class="chip ${i===selDay?"on":""} ${st.mode==="live"&&i===st.idx?"today":""}" data-day="${i}"><b>Day ${d.n}</b><span>${d.mmdd} ${esc(d.cities[0])}</span></button>`).join("");
+}
+function renderPlan(){
+  renderChips();
+  const day = TRIP.days[selDay];
+  const st = tripState();
+  let h = `<div class="dayhead"><div class="t">${esc(day.cities.join(" → "))}</div><div class="w">${day.mmdd}（${day.week}）${day.note ? " · 預估 "+esc(day.note) : ""}</div></div>`;
+  h += `<div class="wx-row" id="wxPlan">${day.cities.map(c => wxCardPlan(c, day)).join("")}</div><div style="height:12px"></div>`;
+  h += renderTimeline(day, st.mode==="live" && st.idx===selDay);
+  h += `<h2 class="sec">當晚住宿</h2>${hotelCard(day)}`;
+  $("#planDay").innerHTML = h;
+  loadWeather(day, "#wxPlan");
+}
+
+/* 美化行前須知 markdown */
+function md(s){
+  return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/_\(|\)_/g,m=>m.replace("_","")).split(/\n+/).filter(x=>x.trim()).map(x=>`<p>${x.replace(/^-\s*/,"• ")}</p>`).join("");
+}
+
+function renderInfo(){
+  const tips = (TRIP.extra["行前準備"]||[]).find(c => c.desc && /電壓|簽證/.test(c.desc));
+  const contacts = CONFIG.contacts.map(c => `<div class="tel"><div><div class="n">${esc(c.name)}</div><div class="d">${esc(c.desc||"")}</div></div>
+      ${c.phone ? `<a class="num" href="tel:${esc(c.phone.replace(/[^\d+]/g,""))}">${esc(c.phone)}</a>` : `<span class="d">（電話待填）</span>`}</div>`).join("");
+  const em = [
+    ["報警","中國大陸","110"],["救護車","中國大陸","120"],["火警","中國大陸","119"],
+    ["海基會 24 小時緊急服務","台灣人在大陸急難","+886-2-2533-9995"],
+    ["外交部旅外急難專線","24 小時","+886-800-085-095"],
+  ].map(([n,d,p]) => `<div class="tel"><div><div class="n">${n}</div><div class="d">${d}</div></div><a class="num" href="tel:${p.replace(/[^\d+]/g,"")}">${p}</a></div>`).join("");
+  const hotels = TRIP.days.map(d => ({ date:d.mmdd, n:d.n, city:d.endCity, name: d.hotel ? d.hotel.name : "（待補）" }));
+  $("#v-info").innerHTML = `
+    <h2 class="sec">匯率換算</h2>
+    <div class="card">
+      <div class="fx">
+        <div><label>人民幣 CNY</label><input id="cny" inputmode="decimal" value="100"></div>
+        <div class="eq">=</div>
+        <div><label>新台幣 TWD</label><input id="twd" inputmode="decimal"></div>
+      </div>
+      <div class="quick">${[10,50,100,200,500,1000].map(v=>`<button data-cny="${v}">¥${v}</button>`).join("")}</div>
+      <div class="rate" id="rateNote">匯率載入中…</div>
+    </div>
+    <h2 class="sec">緊急聯絡</h2>
+    <div class="card">${contacts}${em}</div>
+    <h2 class="sec">住宿一覽</h2>
+    <div class="card" style="padding:8px 12px"><table class="sort" id="hotelTbl">
+      <thead><tr><th data-k="n" data-t="num">日期</th><th data-k="city">城市</th><th data-k="name">酒店</th></tr></thead>
+      <tbody></tbody></table></div>
+    ${tips ? `<h2 class="sec">行前須知</h2><div class="card tips">${md(tips.desc)}</div>` : ""}
+  `;
+  // 可排序表格
+  const tbl = $("#hotelTbl"); let sortK = "n", dir = 1;
+  const draw = () => {
+    const rows = [...hotels].sort((a,b) => (sortK==="n" ? a.n-b.n : String(a[sortK]).localeCompare(String(b[sortK]),"zh-Hant")) * dir);
+    tbl.querySelector("tbody").innerHTML = rows.map(r => `<tr><td>${r.date}</td><td>${esc(r.city)}</td><td>${esc(r.name)}</td></tr>`).join("");
+    tbl.querySelectorAll("th").forEach(th => th.className = th.dataset.k===sortK ? (dir>0?"asc":"desc") : "");
+  };
+  tbl.querySelectorAll("th").forEach(th => th.onclick = () => { if (sortK===th.dataset.k) dir=-dir; else { sortK=th.dataset.k; dir=1; } draw(); });
+  draw();
+  // 匯率
+  const cny = $("#cny"), twd = $("#twd");
+  const r = () => RATE || CONFIG.fallbackRate;
+  const fmt = v => isFinite(v) ? (Math.round(v*100)/100).toLocaleString("zh-TW") : "";
+  const num = s => parseFloat(String(s).replace(/,/g,""));
+  cny.oninput = () => twd.value = fmt(num(cny.value) * r());
+  twd.oninput = () => cny.value = fmt(num(twd.value) / r());
+  document.querySelectorAll("[data-cny]").forEach(b => b.onclick = () => { cny.value = b.dataset.cny; cny.oninput(); });
+  const note = () => { $("#rateNote").textContent = `1 人民幣 ≈ ${r().toFixed(3)} 新台幣（${RATE_SRC || "備用匯率"}）`; cny.oninput(); };
+  note(); loadRate().then(note);
+}
+
+function renderFood(){
+  const icon = n => /飲料|奶|茶/.test(n) ? "🧋" : /咖啡/.test(n) ? "☕" : /麵包|牛角|Pudding|Butter/i.test(n) ? "🥐" : /眼鏡/.test(n) ? "👓" : /酒館/.test(n) ? "🍶" : "🥟";
+  const list = (TRIP.extra["吃喝清單"]||[]).map(c => `<div class="food"><div class="e">${icon(c.name)}</div><div><div class="n">${esc(c.name)}</div>${c.desc?`<div class="d">${esc(c.desc)}</div>`:""}</div></div>`).join("");
+  const hz = (TRIP.extra["行前準備"]||[]).find(c => /美食/.test(c.name));
+  const hzList = hz ? hz.desc.split(/\n/).filter(x=>x.trim()).map(x => { const [n,...d] = x.split(/[：:]/); return `<div class="food"><div class="e">🍲</div><div><div class="n">${esc(n)}</div><div class="d">${esc(d.join("："))}</div></div></div>`; }).join("") : "";
+  $("#v-food").innerHTML = `<h2 class="sec">想吃想喝清單</h2><div class="card">${list || "（Trello 尚無資料）"}</div>
+    ${hzList ? `<h2 class="sec">${esc(hz.name)}</h2><div class="card">${hzList}</div>` : ""}`;
+}
+
+/* ---------- 即時資訊 ---------- */
+const WMO = c => c===0?["☀️","晴"]:c<=2?["🌤️","晴時多雲"]:c===3?["☁️","陰"]:c<=48?["🌫️","霧"]:c<=57?["🌦️","毛毛雨"]:c<=67?["🌧️","下雨"]:c<=77?["🌨️","下雪"]:c<=82?["🌧️","陣雨"]:["⛈️","雷雨"];
+function wxCardPlan(city, day){
+  return `<div class="wx plan" data-city="${esc(city)}"><div class="city">${esc(city)}</div>
+    <div class="big">${day.note ? esc(day.note) : "—"}</div><div class="sub">行程表預估</div></div>`;
+}
+const WX_CACHE = {};
+async function fetchWx(city){
+  if (WX_CACHE[city]) return WX_CACHE[city];
+  const g = CITY_GEO[city]; if (!g) return null;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${g[0]}&longitude=${g[1]}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FShanghai&forecast_days=16`;
+  WX_CACHE[city] = fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
+  return WX_CACHE[city];
+}
+async function loadWeather(day, sel){
+  const iso = `${day.date.getFullYear()}-${String(day.date.getMonth()+1).padStart(2,"0")}-${String(day.date.getDate()).padStart(2,"0")}`;
+  const isToday = sameDay(day.date, now());
+  for (const city of day.cities) {
+    const j = await fetchWx(city);
+    const box = document.querySelector(`${sel} .wx[data-city="${city}"]`);
+    if (!box || !j || !j.daily) continue;
+    const i = j.daily.time.indexOf(iso);
+    if (i < 0) continue; // 超過 16 天預報範圍，保留行程表預估
+    const [ic, tx] = WMO(j.daily.weather_code[i]);
+    const hi = Math.round(j.daily.temperature_2m_max[i]), lo = Math.round(j.daily.temperature_2m_min[i]);
+    const rain = j.daily.precipitation_probability_max[i];
+    const cur = isToday && j.current ? Math.round(j.current.temperature_2m) : null;
+    box.classList.remove("plan");
+    box.innerHTML = `<div class="city">${ic} ${esc(city)}</div>
+      <div class="big">${cur !== null ? cur+"°" : hi+"°"}<small> ${cur !== null ? "現在" : "最高"}</small></div>
+      <div class="sub">${tx} · ${lo}°–${hi}°${rain != null ? ` · 降雨 ${rain}%` : ""}</div>
+      ${rain >= 50 ? `<div class="sub" style="color:var(--vermil);font-weight:700">☂️ 記得帶傘</div>` : ""}`;
+  }
+}
+async function loadRate(){
+  if (RATE) return;
+  try {
+    const j = await fetch("https://open.er-api.com/v6/latest/CNY").then(r => r.json());
+    if (j && j.rates && j.rates.TWD) { RATE = j.rates.TWD; RATE_SRC = "即時匯率 " + (j.time_last_update_utc||"").slice(5,16); store.set("rate", { RATE, RATE_SRC }); return; }
+  } catch(e){}
+  const c = store.get("rate"); if (c) { RATE = c.RATE; RATE_SRC = c.RATE_SRC + "（離線暫存）"; }
+}
+
+/* ---------- 事件 ---------- */
+function show(v){
+  document.querySelectorAll(".view").forEach(x => x.classList.toggle("on", x.id === "v-"+v));
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  if (v === "plan") renderPlan();
+  window.scrollTo({ top: 0 });
+  if (location.hash.slice(1) !== v) history.replaceState(null, "", "#"+v);
+}
+document.addEventListener("click", e => {
+  const tab = e.target.closest("nav.tabs button"); if (tab) return show(tab.dataset.v);
+  const chip = e.target.closest(".chip"); if (chip) { selDay = +chip.dataset.day; store.set("selDay", selDay); renderPlan(); chip.scrollIntoView({ inline:"center", block:"nearest" }); return; }
+  const drv = e.target.closest("[data-drv]");
+  if (drv) {
+    const p = drv.dataset.drv, c = drv.dataset.city;
+    $("#drvDest").textContent = p; $("#drvCity").textContent = c ? `（${AMAP_CITY[c]||c}）` : "";
+    $("#drvAmap").href = amap(p,c); $("#drvGoogle").href = gmap(p,c);
+    $("#driver").classList.add("on"); return;
+  }
+  if (e.target.id === "drvClose") $("#driver").classList.remove("on");
+});
+
+/* ---------- 啟動 ---------- */
+function boot(snap){
+  TRIP = parseTrip(snap);
+  document.title = TRIP.title;
+  $("#hdrTitle").textContent = TRIP.title;
+  const d0 = TRIP.days[0].date, d1 = TRIP.days[TRIP.days.length-1].date;
+  $("#hdrEyebrow").textContent = `${d0.getFullYear()} · ${TRIP.days[0].mmdd} – ${TRIP.days[TRIP.days.length-1].mmdd} · ${TRIP.days.length} 天`;
+  const st = tripState();
+  const saved = store.get("selDay");
+  selDay = st.mode === "live" ? st.idx : (Number.isInteger(saved) && saved < TRIP.days.length ? saved : 0);
+  renderToday(); renderInfo(); renderFood();
+  $("#syncNote").textContent = `行程資料同步自 Trello「${TRIP.board}」· ${TRIP.syncedAt}`;
+  const h = location.hash.slice(1);
+  if (["today","plan","info","food"].includes(h)) show(h);
+}
+boot(SNAPSHOT);
+// 每 5 分鐘更新「進行中 / 下一站」
+setInterval(() => { if ($("#v-today").classList.contains("on")) renderToday(); }, 300000);
+// 離線可用（部署在自己的網址時才會啟用）
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
